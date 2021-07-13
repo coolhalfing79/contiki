@@ -54,12 +54,12 @@ calculate_path_metric(rpl_parent_t *p)
   return p->mc.obj.etx + (uint16_t)p->link_metric;
 }
 
-static uint8_t
+static rpl_path_metric_t
 calculate_energy_metric(rpl_parent_t *p)
 {
   battery_charge_set();
   uint8_t energy = ENERGY_MAX - (uint8_t)(battery_charge_value/0x01000000);
-  PRINTF("BAT: %u\n", energy);
+//  PRINTF("BAT: %u\n", energy);
   // return ENERGY_MAX - (energy_consumed/ENERGY_MAX);
   return energy;
 }
@@ -68,7 +68,7 @@ static rpl_path_metric_t
 calculate_hopcount_metric(rpl_parent_t *p)
 {
 
-	if(p == NULL){
+	if(p == NULL || p->mc.obj.hopcount > HOPCOUNT_MAX){
 		return HOPCOUNT_MAX;
 	}
 	return p->mc.obj.hopcount + 1;
@@ -221,15 +221,14 @@ update_metric_container(rpl_instance_t *instance)
     en = calculate_energy_metric(dag->preferred_parent);
     hopcount = calculate_hopcount_metric(dag->preferred_parent);
   }
-  instance->mc.obj.etx = path_metric;
   instance->mc.obj.energy.flags = type << RPL_DAG_MC_ENERGY_TYPE;
+  instance->mc.obj.etx = path_metric;
   instance->mc.obj.energy.energy_est = en;
   instance->mc.obj.hopcount = hopcount;
-  PRINTF("RPL: etx:%u energy:%u hc:%u Quality:%u\n",
-          instance->mc.obj.etx,
-          instance->mc.obj.energy.energy_est,
+  PRINTF("RPL: etx:%u energy:%u hc:%u, Quality:%u\n",
+  	  instance->mc.obj.etx = path_metric/RPL_DAG_MC_ETX_DIVISOR,
+  	  instance->mc.obj.energy.energy_est = en,
           instance->mc.obj.hopcount,
           quality(qos(path_metric, 2, hopcount),en));
-
 }
 #endif /* RPL_DAG_MC == RPL_DAG_MC_NONE */
